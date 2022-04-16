@@ -28,12 +28,16 @@ const products = [
         name: "Samsung",
         price: 5000,
         imgUrl: "img/ap.png"
+        // adfs
     }
 ]
 
 const productsId = document.getElementById('products');
 const ad = document.getElementById('ad');
 const basketTotal = document.getElementById('total');
+const searchBtn = document.getElementById('search__btn');
+const searchInput = document.getElementById('search__input')
+
 
 products.forEach(product => {
     productsId.innerHTML += `
@@ -43,16 +47,19 @@ products.forEach(product => {
                     <h5>${product.name}</h5>
                     <h6>${product.price} сом</h6>
                     <button class="product__basket-btn" data-id=${product.id} data-name=${product.name} data-price=${product.price}>Добавить в корзину</button>
+                    <button class="product_delete_basket-btn" data-id=${product.id} data-name=${product.name} data-price=${product.price}>Удалить из корзины</button>
                 </div
             </div>
 `
 })
-
 const addBasketBtns = document.querySelectorAll('.product__basket-btn');
-addBasketBtns.forEach(btn => btn.addEventListener('click', addToBasket));
+const deleteBasketBtns = document.querySelectorAll('.product_delete_basket-btn');
 
+addBasketBtns.forEach(btn => btn.addEventListener('click', addToBasket))
+deleteBasketBtns.forEach(btn => btn.addEventListener('click', deletefromBasket))
 
 /// добавление рекламы
+
 const handleAd = {
     closeBtn: document.getElementById('closeBtn'),
     counter: document.getElementById('ad__counter-count'),
@@ -78,8 +85,8 @@ const handleAd = {
     }
 }
 
-
 // добавление товара в корзину
+
 let cart = {};
 
 function showTotalSumm() {
@@ -142,42 +149,71 @@ function addToBasket(e) {
     setTotalSumm();
 }
 
-handleAd.closeBtn.addEventListener('click', handleAd.hideAd)
 
 
-//Удаление товара из корзины
-const deleteBasketBtns = document.querySelectorAll('.product__basket-btn-delete');
-deleteBasketBtns.forEach(btn => btn.addEventListener('click', deleteInBasket));
+// Удалить товара из корзины
 
-
-function deleteInBasket(e) {
+function deletefromBasket(e) {
     e.preventDefault()
     const dataset = e.target.dataset
-
     const data = {
         id: dataset.id,
         name: dataset.name,
         price: +dataset.price
-    }  
-
-    if (cart[data.id]) {
-        if (cart[data.id].count > 1) {
-            cart[data.id].count--
-            cart[data.id].productSumm = cart[data.id].count * data.price
-        } else {
-            delete cart[data.id]
-        }
-    } else {
-        alert('Этого товара в корзине нету')
     }
 
     let cart = JSON.parse(localStorage.getItem('cart'));
+    if (cart[data.id].count > 0) {
+        cart[data.id].count--
+        cart[data.id].productSumm = cart[data.id].count * data.price
+    } else {
+        alert('Вы же его не добавляли')
+    }
+
     localStorage.setItem('cart', JSON.stringify(cart))
 
     setTotalSumm();
 }
 
 
+function setLocalStorage() {
+    localStorage.setItem('cart', JSON.stringify(cart))
+}
+
+function addToBasket(e) {
+    e.preventDefault();
+    const dataset = e.target.dataset
+    const data = {
+        id: dataset.id,
+        name: dataset.name,
+        price: +dataset.price
+    }
+    const cartLocalStorage = localStorage.getItem('cart');
+    const cartObj = JSON.parse(cartLocalStorage)
+
+    cart = {...cartObj}
+
+    if (cart[data.id]) {
+        cart[data.id].count++,
+            cart[data.id].productSumm = cart[data.id].count * data.price
+    } else {
+        cart[data.id] = {
+            count: 1,
+            name: data.name,
+            price: +data.price,
+            productSumm: +data.price
+        }
+    }
+    setLocalStorage();
+    setTotalSumm();
+}
+
+
+// handleAd.handleShow();
+handleAd.closeBtn.addEventListener('click', handleAd.hideAd)
+
+handleAd.handleShow();
+handleAd.closeBtn.addEventListener('click', handleAd.hideAd)
 
 
 
@@ -188,16 +224,6 @@ function deleteInBasket(e) {
 
 
 
-
-
-
-
-
-
-
-
-
-//Поик товара
 
 // const searchBtn = document.getElementById('search__btn');
 // const searchInput = document.getElementById('search__input');
@@ -213,4 +239,4 @@ function deleteInBasket(e) {
 // searchInput.addEventListener('click', (e) => {
 //     e.preventDefault();
 //     search(searchInput.value)
-// });
+// }); 
